@@ -1,1 +1,13 @@
-<h1>PRODUCTO: {{product}}</h1>
+{% extends 'base.html.twig' %}
+{% block content %}
+{ #dump(productos) #}
+  <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">Productos</h1>
+    <h2 class="sub-header">Edición Productos</h2><h3>{{productos.nombre}}</h3><h3>{{productos.precio}}</h3>
+    <div class="container fluid">
+      {{ form_start(form) }}
+	  {{ form_widget(form) }}
+      {{ form_end(form) }}
+    </div>
+  </div>
+{% endblock %}     
