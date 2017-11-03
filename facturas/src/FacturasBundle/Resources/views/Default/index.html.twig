@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
 {% block content %}
+{{dump(facturas)}}
   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
     <h1 class="page-header">Facturas</h1>
     <h2 class="sub-header">Listado Facturas</h2><a href="/facturas/new" type="button" class="btn btn-success">Crear factura</a>
@@ -15,12 +16,29 @@
         </thead>
         <tbody>
         {% for factura in facturas%}
+          
+          <a  data-toggle="collapse" href="#collapseExample{{factura.id}}" aria-expanded="false" aria-controls="collapseExample">
           <tr>
+          
             <td>{{factura.numeroFactura}}</td>
-            <td>{{factura.idCliente}}</td>
-            <td></td>
+            <td>{{factura.cliente}}</td>
+            <td>{{factura.total}}</td>
+        
             <td><span><a href="/facturas/{{factura.id}}/edit" alt="Editar"><i class="fa fa-pencil-square" aria-hidden="true"></i></a><a href="/facturas/{{factura.id}}/delete" alt="Borrar"><i class="fa fa-trash-o" aria-hidden="true"></i></a></td>
+               
           </tr>
+           </a> 
+          <div class="collapse" id="collapseExample{{factura.id}}">
+              <div class="card card-block">
+                {% for item in factura.productos %}
+                <tr>
+                  <th>{{item.nombre}}</th>
+                  <th>{{item.precio}}</th>
+                </tr>
+                {%endfor%}
+              </div>
+          </div>    
+            
         {%endfor%}  
         </tbody>
       </table>

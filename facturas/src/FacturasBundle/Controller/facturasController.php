@@ -8,6 +8,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use FacturasBundle\Entity\facturas;
+use ClientesBundle\Entity\clientes;
+use ProductosBundle\Entity\productos;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
@@ -18,17 +20,87 @@ class facturasController extends Controller
      */
     public function getAllFacturas(Request $request)
     {
+        $facturasFinales = [];
     	$em = $this->getDoctrine()->getManager();
     	$repository = $em->getRepository('FacturasBundle:facturas');
-    	$facturas = $repository->findAll();
-    	
+        $query = $repository->createQueryBuilder('cc')
+            ->select('DISTINCT cc.numeroFactura')
+            ->getQuery();
+        $init = $query->getResult();
+        foreach ($init as $key => $value) {
+            $facturasOrganizadas = $this->getFactInfo($value['numeroFactura']);
+
+            array_push($facturasFinales,$facturasOrganizadas);
+            
+        }
+
+        foreach ($facturasFinales as $key => $value) {
+            $sum = 0;
+            foreach ($value['productos'] as $llave => $valor) {
+                
+                $sum += $valor['precio'];    
+            }
+            $facturasFinales[$key]['total'] = $sum;
+        }
+        
+        
+       
+        //$facturasOrganizadas = $this->getFactInfo($facturas);
     	//return new Response('datos tabla facturas');
         return $this->render('FacturasBundle:Default:index.html.twig', 
         		array(
-        			'facturas'=>$facturas	
+        			'facturas'=>$facturasFinales	
     			)
         	);
         
+    }
+
+    public function getFactInfo($numeroFactura){
+        $resultado = ['cliente'=>'','numeroFactura'=>'','productos'=>[]];
+        $em = $this->getDoctrine()->getManager();
+        $repositoryFacturas = $em->getRepository('FacturasBundle:facturas');
+        $repositoryClientes = $em->getRepository('ClientesBundle:clientes');
+        $repositoryProductos = $em->getRepository('ProductosBundle:productos');
+        $facturas = $repositoryFacturas->findBy(
+            array('numeroFactura' => $numeroFactura)
+            
+        );
+        $clienteFactura = new facturas;
+        $datosClienteFactura = new clientes;
+        $clienteFactura = $facturas[0];
+        $idCliente = $clienteFactura->getIdCliente();
+        $datosClienteFactura = $repositoryClientes->findOneById($idCliente);
+        $idFactura =  $clienteFactura->getId();
+        $resultado['cliente']=$datosClienteFactura->getNombres();
+        $resultado['numeroFactura'] = $numeroFactura;
+        $resultado['id'] = $idFactura;
+        
+         if(count($facturas) > 1){
+            foreach ($facturas as $key => $value) {
+                $facturasVarias = new facturas;
+                $facturasVarias = $value;
+                $idpro=$facturasVarias->getIdProducto();
+                $datosProducto=$repositoryProductos->findOneById($idpro);
+                $arrayPass = array(
+                     'id'=>$datosProducto->getId(),
+                    'nombre'=>$datosProducto->getNombre(),
+                    'precio'=>$datosProducto->getPrecio(),
+                    );
+                array_push($resultado['productos'],$arrayPass);
+            }
+         } else {
+            $idpro=$clienteFactura->getIdProducto();
+            $datosProducto=$repositoryProductos->findOneById($idpro); 
+
+            $resultado['productos'][0]= array(
+                    'id'=>$datosProducto->getId(),
+                    'nombre'=>$datosProducto->getNombre(),
+                    'precio'=>$datosProducto->getPrecio(),
+                );
+         }
+                 
+        
+        return $resultado;
     }
 
     /**
