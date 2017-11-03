@@ -19,6 +19,9 @@ class AppKernel extends Kernel
             new FacturasBundle\FacturasBundle(),
             new ProductosBundle\ProductosBundle(),
             new ClientesBundle\ClientesBundle(),
+            
+            
+            
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

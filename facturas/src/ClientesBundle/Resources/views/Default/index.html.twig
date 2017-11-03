@@ -9,13 +9,17 @@
           <tr>
             <th>Nombre</th>
             <th>Identificación</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
+          {% for cliente in clientes %}
           <tr>
-          	<td>dolores</td>
-            <td>1001</td>
+          	<td>{{cliente.nombres}}</td>
+            <td>{{cliente.identificacion}}</td>
+            <td><span><a href="/clientes/{{cliente.id}}/edit" alt="Editar"><i class="fa fa-pencil-square" aria-hidden="true"></i></a><a href="/clientes/{{cliente.id}}/delete" alt="Borrar"><i class="fa fa-trash-o" aria-hidden="true"></i></a></td>
           </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>
